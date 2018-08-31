@@ -1,6 +1,9 @@
 # python3
 
 
+INF = 100000
+
+
 class Edge:
     def __init__(self, u, v, capacity):
         self.u = u
@@ -63,7 +66,35 @@ def read_data():
 def max_flow(graph, from_, to):
     flow = 0
     # your code goes here
+    while True:
+        prev, h = find_augmenting_path(graph, from_, to)
+        if h[to] == INF:
+            break
+        flow += h[to]
+        u = INF
+        while u != from_:
+            edge_id = prev.pop()
+            edge = graph.get_edge(edge_id)
+            if edge.v == u or u == INF:
+                u = edge.u
+                graph.add_flow(edge_id, h[to])
     return flow
+
+
+def find_augmenting_path(graph, from_, to):
+    queue = [from_]
+    prev = []
+    h = [INF for _ in range(graph.size())]
+    while queue and h[to] == INF:
+        vertex_id = queue.pop(0)
+        for adj in graph.get_ids(vertex_id):
+            adj_edge = graph.get_edge(adj)
+            if h[adj_edge.v] == INF:
+                if adj_edge.capacity > adj_edge.flow:
+                    h[adj_edge.v] = min(h[vertex_id], adj_edge.capacity - adj_edge.flow)
+                    queue.append(adj_edge.v)
+                    prev.append(adj)
+    return prev, h
 
 
 if __name__ == '__main__':
