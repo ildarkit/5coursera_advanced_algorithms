@@ -64,6 +64,14 @@ def read_data():
 
 
 def max_flow(graph, from_, to):
+    """
+    Implementation of the Edmonds-Karp algorithm for
+    searching max flow.
+    :param graph: directed graph
+    :param from_: node S
+    :param to: node T
+    :return: max flow
+    """
     flow = 0
     # your code goes here
     while True:
@@ -82,6 +90,13 @@ def max_flow(graph, from_, to):
 
 
 def find_augmenting_path(graph, from_, to):
+    """
+    Search for a augmenting path by traversing the graph in width (BFS).
+    :param graph: directed graph
+    :param from_: node S
+    :param to: node T
+    :return: list of edges and list of flows of vertices
+    """
     queue = [from_]
     prev = []
     h = [INF for _ in range(graph.size())]
@@ -94,6 +109,10 @@ def find_augmenting_path(graph, from_, to):
                     h[adj_edge.v] = min(h[vertex_id], adj_edge.capacity - adj_edge.flow)
                     queue.append(adj_edge.v)
                     prev.append(adj)
+            if h[to] < INF:
+                # node T has been reached
+                # stop search for a augmenting path
+                break
     return prev, h
 
 
