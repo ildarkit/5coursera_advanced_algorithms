@@ -33,8 +33,9 @@ def build_network(adj_matrix):
     for i in range(len(adj_matrix)):
         for j in range(len(adj_matrix[i])):
             if adj_matrix[i][j] == 1:
-                adj_network[i + 1].update({j + len(adj_matrix[i]): Edge(i + 1, j + len(adj_matrix[i]))})
-                edges_from_nodes.add(j + len(adj_matrix[i]))
+                edge = Edge(i + 1, j + 1 + len(adj_matrix))
+                adj_network[i + 1].update({j + 1 + len(adj_matrix): edge})
+                edges_from_nodes.add(j + 1 + len(adj_matrix))
                 edges_count += 1
     for i in edges_from_nodes:
         adj_network[i].update({len(adj_network) - 1: Edge(i, len(adj_network) - 1)})
