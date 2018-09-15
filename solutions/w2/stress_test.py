@@ -80,6 +80,9 @@ def main():
             b_original.append(b[i])
 
         ## Get the result from your implementation
+        if not test:
+            num_correct += 1
+            continue
         result = gaussian_elimination(
             test)  # NOTE: This was SolveEquation(equation) in the template file, so change this line if necessary
 

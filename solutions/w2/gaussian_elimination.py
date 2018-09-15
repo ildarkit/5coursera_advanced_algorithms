@@ -1,5 +1,5 @@
 # python3
-EPS = 1e-2
+EPS = 1e-6
 PRECISION = '.6f'
 
 
@@ -15,7 +15,7 @@ def gaussian_elimination(a):
             if diff > EPS:
                 pivot = abs(a[i][k])
                 pivot_row = i
-        if abs(a[pivot_row][k] - EPS) < EPS:  # a[pivot_row][k] == 0
+        if abs(a[pivot_row][k] - EPS) == EPS:  # a[pivot_row][k] == 0
             k += 1
         else:
             # swap
@@ -45,8 +45,8 @@ def gaussian_elimination(a):
                         a[i][j] += a[h][j]*f
             h += 1
             k += 1
-    # return ' '.join([format(row[-1], PRECISION) for row in a])
-    return [row[-1] for row in a]
+    return ' '.join([format(row[-1], PRECISION) for row in a])
+    # return [row[-1] for row in a]
 
 
 def read_equation():
