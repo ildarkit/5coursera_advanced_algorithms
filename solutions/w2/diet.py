@@ -2,8 +2,37 @@
 from sys import stdin
 
 
-def solve_diet_problem(n, m, A, b, c):
+class Tableau:
+    def __init__(self, source, b, pleasures):
+        self.source = source
+        self.simplex_table = []
+        self.b = b
+        self.pleasures = pleasures
+        self.basis_values = []
+
+    def pivot_column(self):
+        pass
+
+    def pivot_row(self, row):
+        pass
+
+    def pivot(self, row, column):
+        pass
+
+    def swap(self):
+        pass
+
+    def check(self):
+        pass
+
+
+def solve_diet_problem(n, m, a, b, c):
     # Write your code here
+    simplex = Tableau(a, b, c)
+    while not simplex.check():
+        pivot_column = simplex.pivot_column()
+        pivot_row = simplex.pivot_row(pivot_column)
+        simplex.pivot(pivot_row, pivot_column)
     return [0, [0] * m]
 
 
