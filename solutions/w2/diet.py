@@ -66,10 +66,29 @@ class Tableau:
         pass
 
     def is_optimum(self):
-        result = True
+        result = 2
+        negative = positive = zero = 0
         for j in range(1, self.simplex_table[-1]):
             if self.simplex_table[-1][j] < 0:
-                result = False
+                negative += 1
+            elif self.simplex_table[-1][j] > 0:
+                positive += 1
+            else:
+                zero += 1
+            if negative > 0 and positive > 0:
+                result = 0
+                break
+        if result and not(negative or positive) and zero:
+            # признак альтернативности оптимального решения (не единственного решения)
+            result = 1
+
+        return result
+
+    def no_solution(self):
+        result = 0
+        for i in range(len(self.simplex_table) - 1):
+            if self.simplex_table[i][0] < 0:
+                result = -1
                 break
         return result
 
@@ -78,11 +97,21 @@ def solve_diet_problem(n, m, a, b, c):
     # Write your code here
     simplex_method = Tableau(m, a, b, c)
     simplex_method.init_simplex_table()
-    while not simplex_method.is_optimum():
+    result = 0
+    while not result:
+        result = simplex_method.is_optimum()
+        if result:
+            break
+        else:
+            # not optimal solution
+            result = simplex_method.no_solution()
+            if result:
+                # no solution
+                break
         pivotcol = simplex_method.pivot_column()
         pivotrow = simplex_method.pivot_row(pivotcol)
         simplex_method.transform(pivotrow, pivotcol)
-    return [0, [0] * m]
+    return [result, [0] * m]
 
 
 def read_inputs():
@@ -101,7 +130,7 @@ if __name__ == "__main__":
 
     if anst == -1:
         print("No solution")
-    if anst == 0:
+    if anst == 2:
         print("Bounded solution")
         print(' '.join(list(map(lambda x : '%.18f' % x, ansx))))
     if anst == 1:
