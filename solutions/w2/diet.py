@@ -3,9 +3,10 @@ from sys import stdin
 
 
 INF = float('INF')
+INF_CONSTRAINT = 10**9
 
 
-class Tableau:
+class Simplex:
     def __init__(self, m, source, b, pleasures):
         self.source = source
         self.simplex_table = []
@@ -19,9 +20,12 @@ class Tableau:
             self.simplex_table.append([bi])
             self.simplex_table[-1].extend(self.source[i])
             self.basis_values.append(bi)
+        self.basis_values.append(INF_CONSTRAINT)
+        self.simplex_table.append([INF_CONSTRAINT])
         func = [0]
         for ci in self.pleasures:
             func.append(ci * -1)
+            self.simplex_table[-1].append(1)
         self.simplex_table.append(func)
 
     def pivot_column(self):
@@ -84,7 +88,7 @@ class Tableau:
             if negative > 0 and positive > 0:
                 result = 0
                 break
-        if result and (abs(negative - positive) == len(self.simplex_table[-1]) - 2) and zero:
+        if result and (abs(negative - positive) == len(self.simplex_table[-1]) - (zero + 1)) and zero:
             # признак альтернативности оптимального решения (не единственного решения)
             result = 1
         else:
@@ -103,7 +107,7 @@ class Tableau:
 
 def solve_diet_problem(n, m, a, b, c):
     # Write your code here
-    simplex_method = Tableau(m, a, b, c)
+    simplex_method = Simplex(m, a, b, c)
     simplex_method.init_simplex_table()
     result = 0
     while not result:
