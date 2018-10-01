@@ -12,6 +12,7 @@ class Tableau:
         self.b = b
         self.pleasures = pleasures
         self.basis_values = [0 for _ in range(m)]
+        self.forced_pivot_col = 1
 
     def init_simplex_table(self):
         for i, bi in enumerate(self.b):
@@ -24,17 +25,17 @@ class Tableau:
         self.simplex_table.append(func)
 
     def pivot_column(self):
-        pivot_col = -1
+        pivot_col = self.forced_pivot_col
         min_negative = INF
-        for j in range(1, len(self.simplex_table[-1])):
-            if self.simplex_table[-1][j] < 0 and abs(self.simplex_table[-1][j]) < min_negative:
-                min_negative = abs(self.simplex_table[-1][j])
+        for j in range(self.forced_pivot_col, len(self.simplex_table[-1])):
+            if self.simplex_table[-1][j] < 0 and self.simplex_table[-1][j] < min_negative:
+                min_negative = self.simplex_table[-1][j]
                 pivot_col = j
         return pivot_col
 
     def pivot_row(self, pivotcol):
         min_ratio = INF
-        pivotrow = -1
+        pivotrow = 0
         for i in range(len(self.simplex_table) - 1):
             if self.simplex_table[i][0] >= 0 and self.simplex_table[i][pivotcol] > 0:
                 ratio = self.simplex_table[i][0] / self.simplex_table[i][pivotcol]
@@ -46,6 +47,11 @@ class Tableau:
     def transform(self, pivotrow, pivotcol):
         new_simplex_table = []
         pivot = self.simplex_table[pivotrow][pivotcol]
+        if not pivot:
+            self.forced_pivot_col = pivotcol + 1
+            return
+        self.forced_pivot_col = 1
+        self.swap(pivotrow + len(self.simplex_table[0]) - 1, pivotcol - 1)
         for i in range(len(self.simplex_table)):
             new_simplex_table.append([])
             for j in range(len(self.simplex_table[0])):
@@ -62,13 +68,13 @@ class Tableau:
 
         self.simplex_table = new_simplex_table
 
-    def swap(self):
-        pass
+    def swap(self, free, basis):
+        self.basis_values[free], self.basis_values[basis] = self.basis_values[basis], self.basis_values[free]
 
     def is_optimum(self):
         result = 2
         negative = positive = zero = 0
-        for j in range(1, self.simplex_table[-1]):
+        for j in range(1, len(self.simplex_table[-1])):
             if self.simplex_table[-1][j] < 0:
                 negative += 1
             elif self.simplex_table[-1][j] > 0:
@@ -78,9 +84,11 @@ class Tableau:
             if negative > 0 and positive > 0:
                 result = 0
                 break
-        if result and not(negative or positive) and zero:
+        if result and (abs(negative - positive) == len(self.simplex_table[-1]) - 2) and zero:
             # признак альтернативности оптимального решения (не единственного решения)
             result = 1
+        else:
+            result = 0
 
         return result
 
