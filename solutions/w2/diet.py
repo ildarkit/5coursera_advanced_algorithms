@@ -86,12 +86,12 @@ class Simplex:
             else:
                 zero += 1
             if negative > 0 and positive > 0:
-                result = 0
+                # result = 0
                 break
-        if result and (abs(negative - positive) == len(self.simplex_table[-1]) - (zero + 1)) and zero:
+        if abs(negative - positive) == len(self.simplex_table[-1]) - (zero + 1) and zero:
             # признак альтернативности оптимального решения (не единственного решения)
             result = 1
-        else:
+        elif negative:
             result = 0
 
         return result
@@ -100,6 +100,9 @@ class Simplex:
         result = 0
         for i in range(len(self.simplex_table) - 1):
             if self.simplex_table[i][0] < 0:
+                for j in range(1, len(self.simplex_table[i])):
+                    if self.simplex_table[i][j] < 0:
+                        return result
                 result = -1
                 break
         return result
@@ -111,19 +114,19 @@ def solve_diet_problem(n, m, a, b, c):
     simplex_method.init_simplex_table()
     result = 0
     while not result:
-        result = simplex_method.is_optimum()
+        result = simplex_method.no_solution()
         if result:
+            # no solution
             break
         else:
-            # not optimal solution
-            result = simplex_method.no_solution()
+            result = simplex_method.is_optimum()
             if result:
-                # no solution
+                # optimal solution
                 break
         pivotcol = simplex_method.pivot_column()
         pivotrow = simplex_method.pivot_row(pivotcol)
         simplex_method.transform(pivotrow, pivotcol)
-    return [result, [0] * m]
+    return [result, simplex_method.basis_values[:m]]
 
 
 def read_inputs():
