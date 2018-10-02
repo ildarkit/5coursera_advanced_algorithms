@@ -53,9 +53,8 @@ class Simplex:
         pivot = self.simplex_table[pivotrow][pivotcol]
         if not pivot:
             self.forced_pivot_col = pivotcol + 1
-            return
+            return False
         self.forced_pivot_col = 1
-        self.swap(pivotrow + len(self.simplex_table[0]) - 1, pivotcol - 1)
         for i in range(len(self.simplex_table)):
             new_simplex_table.append([])
             for j in range(len(self.simplex_table[0])):
@@ -69,8 +68,11 @@ class Simplex:
                 else:
                     new_element = - self.simplex_table[i][j] / pivot
                 new_simplex_table[-1].append(new_element)
+                if j == 0 and i < len(self.simplex_table) - 1:
+                    self.basis_values[i + len(self.simplex_table[0]) - 1] = new_element
 
         self.simplex_table = new_simplex_table
+        return True
 
     def swap(self, free, basis):
         self.basis_values[free], self.basis_values[basis] = self.basis_values[basis], self.basis_values[free]
@@ -125,7 +127,10 @@ def solve_diet_problem(n, m, a, b, c):
                 break
         pivotcol = simplex_method.pivot_column()
         pivotrow = simplex_method.pivot_row(pivotcol)
-        simplex_method.transform(pivotrow, pivotcol)
+        if simplex_method.transform(pivotrow, pivotcol):
+            simplex_method.swap(pivotrow + m, pivotcol - 1)
+    if INF_CONSTRAINT in simplex_method.basis_values[:m]:
+        result = 1
     return [result, simplex_method.basis_values[:m]]
 
 
