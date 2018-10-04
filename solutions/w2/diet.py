@@ -12,15 +12,22 @@ class Simplex:
         self.simplex_table = []
         self.b = b
         self.pleasures = pleasures
-        self.basis_values = [0 for _ in range(m)]
+        self.basis_values = []
+        self.basis_indexes = []
+        for i in range(m):
+            self.basis_values.append(0)
+            self.basis_indexes.append(i)
         self.forced_pivot_col = 1
 
     def init_simplex_table(self):
+        len_basis = len(self.basis_indexes)
         for i, bi in enumerate(self.b):
             self.simplex_table.append([bi])
             self.simplex_table[-1].extend(self.source[i])
             self.basis_values.append(bi)
+            self.basis_indexes.append(i + len_basis)
         self.basis_values.append(INF_CONSTRAINT)
+        self.basis_indexes.append(len(self.basis_indexes))
         self.simplex_table.append([INF_CONSTRAINT])
         func = [0]
         for ci in self.pleasures:
@@ -69,32 +76,25 @@ class Simplex:
                     new_element = - self.simplex_table[i][j] / pivot
                 new_simplex_table[-1].append(new_element)
                 if j == 0 and i < len(self.simplex_table) - 1:
-                    self.basis_values[i + len(self.simplex_table[0]) - 1] = new_element
+                    basis_value_index = self.basis_indexes[i + len(self.simplex_table[0]) - 1]
+                    self.basis_values[basis_value_index] = new_element
 
         self.simplex_table = new_simplex_table
         return True
 
     def swap(self, free, basis):
-        self.basis_values[free], self.basis_values[basis] = self.basis_values[basis], self.basis_values[free]
+        self.basis_indexes[free], self.basis_indexes[basis] = self.basis_indexes[basis], self.basis_indexes[free]
+        free_index = self.basis_indexes[free]
+        basis_index = self.basis_indexes[basis]
+        self.basis_values[free_index], self.basis_values[basis_index] = (self.basis_values[basis_index],
+                                                                         self.basis_values[free_index])
 
     def is_optimum(self):
         result = 2
-        negative = positive = zero = 0
         for j in range(1, len(self.simplex_table[-1])):
             if self.simplex_table[-1][j] < 0:
-                negative += 1
-            elif self.simplex_table[-1][j] > 0:
-                positive += 1
-            else:
-                zero += 1
-            if negative > 0 and positive > 0:
-                # result = 0
+                result = 0
                 break
-        if abs(negative - positive) == len(self.simplex_table[-1]) - (zero + 1) and zero:
-            # признак альтернативности оптимального решения (не единственного решения)
-            result = 1
-        elif negative:
-            result = 0
 
         return result
 
@@ -109,6 +109,27 @@ class Simplex:
                 break
         return result
 
+    def is_bounded(self):
+        result = 1
+        neg = False
+        for j in range(1, len(self.simplex_table[-1])):
+            if self.simplex_table[-1][j] < 0:
+                neg = True
+                for i in range(len(self.simplex_table) - 1):
+                    if self.simplex_table[i][j] > 0:
+                        return 2
+        if not neg:
+            result = 2
+        return result
+
+    def is_valid(self):
+        result = True
+        for b in self.basis_values:
+            if b < 0:
+                result = False
+                break
+        return result
+
 
 def solve_diet_problem(n, m, a, b, c):
     # Write your code here
@@ -120,16 +141,21 @@ def solve_diet_problem(n, m, a, b, c):
         if result:
             # no solution
             break
+        result = simplex_method.is_bounded()
+        if result == 2:
+            if simplex_method.is_valid():
+                result = simplex_method.is_optimum()
+                if result:
+                    # optimal solution
+                    break
         else:
-            result = simplex_method.is_optimum()
-            if result:
-                # optimal solution
-                break
+            # infinity
+            break
         pivotcol = simplex_method.pivot_column()
         pivotrow = simplex_method.pivot_row(pivotcol)
         if simplex_method.transform(pivotrow, pivotcol):
             simplex_method.swap(pivotrow + m, pivotcol - 1)
-    if INF_CONSTRAINT in simplex_method.basis_values[:m]:
+    if sum(simplex_method.basis_values[:m]) >= INF_CONSTRAINT:
         result = 1
     return [result, simplex_method.basis_values[:m]]
 
