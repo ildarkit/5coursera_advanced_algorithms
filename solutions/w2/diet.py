@@ -4,6 +4,10 @@ from sys import stdin
 
 INF = float('INF')
 INF_CONSTRAINT = 10**9
+EPS = 1e-15
+NO_SOLUTION = 1
+BOUNDED_SOLUTION = 2
+INF_SOLUTION = -1
 
 
 class Simplex:
@@ -90,7 +94,7 @@ class Simplex:
                                                                          self.basis_values[free_index])
 
     def is_optimum(self):
-        result = 2
+        result = BOUNDED_SOLUTION
         for j in range(1, len(self.simplex_table[-1])):
             if self.simplex_table[-1][j] < 0:
                 result = 0
@@ -102,24 +106,24 @@ class Simplex:
         result = 0
         for i in range(len(self.simplex_table) - 1):
             if self.simplex_table[i][0] < 0:
+                result = NO_SOLUTION
                 for j in range(1, len(self.simplex_table[i])):
                     if self.simplex_table[i][j] < 0:
-                        return result
-                result = -1
-                break
+                        result = 0
+                        break
         return result
 
     def is_bounded(self):
-        result = 1
+        result = INF_SOLUTION
         neg = False
         for j in range(1, len(self.simplex_table[-1])):
             if self.simplex_table[-1][j] < 0:
                 neg = True
                 for i in range(len(self.simplex_table) - 1):
                     if self.simplex_table[i][j] > 0:
-                        return 2
+                        return BOUNDED_SOLUTION
         if not neg:
-            result = 2
+            result = BOUNDED_SOLUTION
         return result
 
     def is_valid(self):
@@ -142,12 +146,14 @@ def solve_diet_problem(n, m, a, b, c):
             # no solution
             break
         result = simplex_method.is_bounded()
-        if result == 2:
+        if result == BOUNDED_SOLUTION:
             if simplex_method.is_valid():
                 result = simplex_method.is_optimum()
                 if result:
                     # optimal solution
                     break
+            else:
+                result = 0
         else:
             # infinity
             break
@@ -155,8 +161,8 @@ def solve_diet_problem(n, m, a, b, c):
         pivotrow = simplex_method.pivot_row(pivotcol)
         if simplex_method.transform(pivotrow, pivotcol):
             simplex_method.swap(pivotrow + m, pivotcol - 1)
-    if sum(simplex_method.basis_values[:m]) >= INF_CONSTRAINT:
-        result = 1
+    if result == BOUNDED_SOLUTION and sum(simplex_method.basis_values[:m]) >= INF_CONSTRAINT:
+        result = INF_SOLUTION
     return [result, simplex_method.basis_values[:m]]
 
 
@@ -174,10 +180,10 @@ if __name__ == "__main__":
     n, m, a, b, c = read_inputs()
     anst, ansx = solve_diet_problem(n, m, a, b, c)
 
-    if anst == -1:
+    if anst == NO_SOLUTION:
         print("No solution")
-    if anst == 2:
+    if anst == BOUNDED_SOLUTION:
         print("Bounded solution")
         print(' '.join(list(map(lambda x : '%.18f' % x, ansx))))
-    if anst == 1:
+    if anst == INF_SOLUTION:
         print("Infinity")
