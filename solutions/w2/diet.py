@@ -39,22 +39,33 @@ class Simplex:
             self.simplex_table[-1].append(1)
         self.simplex_table.append(func)
 
-    def pivot_column(self):
-        pivot_col = self.forced_pivot_col
-        min_negative = INF
-        for j in range(self.forced_pivot_col, len(self.simplex_table[-1])):
-            if self.simplex_table[-1][j] < 0 and self.simplex_table[-1][j] < min_negative:
-                min_negative = self.simplex_table[-1][j]
-                pivot_col = j
+    def pivot_column(self, solution_is_valid):
+        if solution_is_valid:
+            pivot_col = self.forced_pivot_col
+            min_negative = INF
+            for j in range(self.forced_pivot_col, len(self.simplex_table[-1])):
+                if self.simplex_table[-1][j] < 0 and self.simplex_table[-1][j] < min_negative:
+                    min_negative = self.simplex_table[-1][j]
+                    pivot_col = j
+        else:
+            pivot_col = -1
+            for i in range(len(self.simplex_table) - 1):
+                if self.simplex_table[i][0] < 0:
+                    for j in range(1, len(self.simplex_table[i])):
+                        if self.simplex_table[i][j] < 0:
+                            pivot_col = j
+                            break
+                if pivot_col != -1:
+                    break
         return pivot_col
 
     def pivot_row(self, pivotcol):
         min_ratio = INF
         pivotrow = 0
         for i in range(len(self.simplex_table) - 1):
-            if self.simplex_table[i][0] >= 0 and self.simplex_table[i][pivotcol] > 0:
+            if self.simplex_table[i][pivotcol] != 0:
                 ratio = self.simplex_table[i][0] / self.simplex_table[i][pivotcol]
-                if ratio < min_ratio:
+                if 0 < ratio < min_ratio:
                     min_ratio = ratio
                     pivotrow = i
         return pivotrow
@@ -114,16 +125,14 @@ class Simplex:
         return result
 
     def is_bounded(self):
-        result = INF_SOLUTION
-        neg = False
+        result = BOUNDED_SOLUTION
         for j in range(1, len(self.simplex_table[-1])):
             if self.simplex_table[-1][j] < 0:
-                neg = True
+                result = INF_SOLUTION
                 for i in range(len(self.simplex_table) - 1):
                     if self.simplex_table[i][j] > 0:
-                        return BOUNDED_SOLUTION
-        if not neg:
-            result = BOUNDED_SOLUTION
+                        result = BOUNDED_SOLUTION
+                        break
         return result
 
     def is_valid(self):
@@ -146,18 +155,19 @@ def solve_diet_problem(n, m, a, b, c):
             # no solution
             break
         result = simplex_method.is_bounded()
-        if result == BOUNDED_SOLUTION:
-            if simplex_method.is_valid():
-                result = simplex_method.is_optimum()
-                if result:
-                    # optimal solution
-                    break
-            else:
-                result = 0
-        else:
+        if result == INF_SOLUTION:
             # infinity
             break
-        pivotcol = simplex_method.pivot_column()
+        basis_solution_is_valid = simplex_method.is_valid()
+        if basis_solution_is_valid:
+            result = simplex_method.is_optimum()
+            if result:
+                # optimal solution
+                break
+        else:
+            result = 0
+
+        pivotcol = simplex_method.pivot_column(solution_is_valid=basis_solution_is_valid)
         pivotrow = simplex_method.pivot_row(pivotcol)
         if simplex_method.transform(pivotrow, pivotcol):
             simplex_method.swap(pivotrow + m, pivotcol - 1)
