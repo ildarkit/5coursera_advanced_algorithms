@@ -4,7 +4,7 @@ from sys import stdin
 
 INF = float('INF')
 INF_CONSTRAINT = 10**9
-EPS = 1e-15
+EPS = 1e-6
 NO_SOLUTION = 1
 BOUNDED_SOLUTION = 2
 INF_SOLUTION = -1
@@ -44,15 +44,15 @@ class Simplex:
             pivot_col = self.forced_pivot_col
             min_negative = INF
             for j in range(self.forced_pivot_col, len(self.simplex_table[-1])):
-                if self.simplex_table[-1][j] < 0 and self.simplex_table[-1][j] < min_negative:
+                if self.simplex_table[-1][j] + EPS < 0.0 and self.simplex_table[-1][j] + EPS < min_negative:
                     min_negative = self.simplex_table[-1][j]
                     pivot_col = j
         else:
             pivot_col = -1
             for i in range(len(self.simplex_table) - 1):
-                if self.simplex_table[i][0] < 0:
+                if self.simplex_table[i][0] + EPS < 0.0:
                     for j in range(1, len(self.simplex_table[i])):
-                        if self.simplex_table[i][j] < 0:
+                        if self.simplex_table[i][j] + EPS < 0.0:
                             pivot_col = j
                             break
                 if pivot_col != -1:
@@ -63,9 +63,10 @@ class Simplex:
         min_ratio = INF
         pivotrow = 0
         for i in range(len(self.simplex_table) - 1):
-            if self.simplex_table[i][pivotcol] != 0:
+            if self.simplex_table[i][pivotcol] + EPS < 0.0 or self.simplex_table[i][pivotcol] > EPS:
+                # self.simplex_table[i][pivotcol] != 0.0
                 ratio = self.simplex_table[i][0] / self.simplex_table[i][pivotcol]
-                if 0 < ratio < min_ratio:
+                if ratio > EPS and ratio + EPS < min_ratio:
                     min_ratio = ratio
                     pivotrow = i
         return pivotrow
@@ -107,7 +108,7 @@ class Simplex:
     def is_optimum(self):
         result = BOUNDED_SOLUTION
         for j in range(1, len(self.simplex_table[-1])):
-            if self.simplex_table[-1][j] < 0:
+            if self.simplex_table[-1][j] + EPS < 0.0:
                 result = 0
                 break
 
@@ -116,10 +117,10 @@ class Simplex:
     def no_solution(self):
         result = 0
         for i in range(len(self.simplex_table) - 1):
-            if self.simplex_table[i][0] < 0:
+            if self.simplex_table[i][0] + EPS < 0.0:
                 result = NO_SOLUTION
                 for j in range(1, len(self.simplex_table[i])):
-                    if self.simplex_table[i][j] < 0:
+                    if self.simplex_table[i][j] + EPS < 0.0:
                         result = 0
                         break
         return result
@@ -127,10 +128,10 @@ class Simplex:
     def is_bounded(self):
         result = BOUNDED_SOLUTION
         for j in range(1, len(self.simplex_table[-1])):
-            if self.simplex_table[-1][j] < 0:
+            if self.simplex_table[-1][j] + EPS < 0.0:
                 result = INF_SOLUTION
                 for i in range(len(self.simplex_table) - 1):
-                    if self.simplex_table[i][j] > 0:
+                    if self.simplex_table[i][j] > EPS:  # self.simplex_table[i][j] > 0
                         result = BOUNDED_SOLUTION
                         break
         return result
@@ -138,7 +139,7 @@ class Simplex:
     def is_valid(self):
         result = True
         for b in self.basis_values:
-            if b < 0:
+            if b + EPS < 0.0:
                 result = False
                 break
         return result
@@ -171,7 +172,7 @@ def solve_diet_problem(n, m, a, b, c):
         pivotrow = simplex_method.pivot_row(pivotcol)
         if simplex_method.transform(pivotrow, pivotcol):
             simplex_method.swap(pivotrow + m, pivotcol - 1)
-    if result == BOUNDED_SOLUTION and sum(simplex_method.basis_values[:m]) >= INF_CONSTRAINT:
+    if result == BOUNDED_SOLUTION and sum(simplex_method.basis_values[:m]) + EPS >= INF_CONSTRAINT:
         result = INF_SOLUTION
     return [result, simplex_method.basis_values[:m]]
 
