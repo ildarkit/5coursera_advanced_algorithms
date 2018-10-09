@@ -4,7 +4,9 @@ from sys import stdin
 
 INF = float('INF')
 INF_CONSTRAINT = 10**9
-EPS = 1e-6
+EPS = 1e-15  # floating-point error
+ZERO = -1e-6
+PRECISION = 11
 NO_SOLUTION = 1
 BOUNDED_SOLUTION = 2
 INF_SOLUTION = -1
@@ -44,15 +46,15 @@ class Simplex:
             pivot_col = self.forced_pivot_col
             min_negative = INF
             for j in range(self.forced_pivot_col, len(self.simplex_table[-1])):
-                if self.simplex_table[-1][j] + EPS < 0.0 and self.simplex_table[-1][j] + EPS < min_negative:
+                if self.simplex_table[-1][j] + EPS < EPS and self.simplex_table[-1][j] + EPS < min_negative:
                     min_negative = self.simplex_table[-1][j]
                     pivot_col = j
         else:
             pivot_col = -1
             for i in range(len(self.simplex_table) - 1):
-                if self.simplex_table[i][0] + EPS < 0.0:
+                if self.simplex_table[i][0] + EPS < EPS:
                     for j in range(1, len(self.simplex_table[i])):
-                        if self.simplex_table[i][j] + EPS < 0.0:
+                        if self.simplex_table[i][j] + EPS < EPS:
                             pivot_col = j
                             break
                 if pivot_col != -1:
@@ -90,6 +92,7 @@ class Simplex:
                     new_element = self.simplex_table[i][j] / pivot
                 else:
                     new_element = - self.simplex_table[i][j] / pivot
+                new_element = round(new_element, PRECISION)
                 new_simplex_table[-1].append(new_element)
                 if j == 0 and i < len(self.simplex_table) - 1:
                     basis_value_index = self.basis_indexes[i + len(self.simplex_table[0]) - 1]
@@ -108,7 +111,7 @@ class Simplex:
     def is_optimum(self):
         result = BOUNDED_SOLUTION
         for j in range(1, len(self.simplex_table[-1])):
-            if self.simplex_table[-1][j] + EPS < 0.0:
+            if self.simplex_table[-1][j] + EPS < ZERO:
                 result = 0
                 break
 
@@ -117,18 +120,20 @@ class Simplex:
     def no_solution(self):
         result = 0
         for i in range(len(self.simplex_table) - 1):
-            if self.simplex_table[i][0] + EPS < 0.0:
+            if self.simplex_table[i][0] + EPS < ZERO:
                 result = NO_SOLUTION
                 for j in range(1, len(self.simplex_table[i])):
-                    if self.simplex_table[i][j] + EPS < 0.0:
+                    if self.simplex_table[i][j] + EPS < EPS:
                         result = 0
                         break
+                if result == NO_SOLUTION:
+                    break
         return result
 
     def is_bounded(self):
         result = BOUNDED_SOLUTION
         for j in range(1, len(self.simplex_table[-1])):
-            if self.simplex_table[-1][j] + EPS < 0.0:
+            if self.simplex_table[-1][j] + EPS < EPS:
                 result = INF_SOLUTION
                 for i in range(len(self.simplex_table) - 1):
                     if self.simplex_table[i][j] > EPS:  # self.simplex_table[i][j] > 0
@@ -139,13 +144,13 @@ class Simplex:
     def is_valid(self):
         result = True
         for b in self.basis_values:
-            if b + EPS < 0.0:
+            if b + EPS < ZERO:
                 result = False
                 break
         return result
 
 
-def solve_diet_problem(n, m, a, b, c):
+def solve_diet_problem(m, a, b, c):
     # Write your code here
     simplex_method = Simplex(m, a, b, c)
     simplex_method.init_simplex_table()
@@ -172,7 +177,7 @@ def solve_diet_problem(n, m, a, b, c):
         pivotrow = simplex_method.pivot_row(pivotcol)
         if simplex_method.transform(pivotrow, pivotcol):
             simplex_method.swap(pivotrow + m, pivotcol - 1)
-    if result == BOUNDED_SOLUTION and sum(simplex_method.basis_values[:m]) + EPS >= INF_CONSTRAINT:
+    if result == BOUNDED_SOLUTION and round(sum(simplex_method.basis_values[:m])) + 2.0 >= INF_CONSTRAINT:
         result = INF_SOLUTION
     return [result, simplex_method.basis_values[:m]]
 
@@ -188,8 +193,8 @@ def read_inputs():
 
 
 if __name__ == "__main__":
-    n, m, a, b, c = read_inputs()
-    anst, ansx = solve_diet_problem(n, m, a, b, c)
+    _, m, a, b, c = read_inputs()
+    anst, ansx = solve_diet_problem(m, a, b, c)
 
     if anst == NO_SOLUTION:
         print("No solution")

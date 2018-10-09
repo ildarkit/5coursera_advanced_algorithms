@@ -6,7 +6,7 @@ import sys
 
 
 if __name__ == '__main__':
-    for index in range(10000):
+    for index in range(100):
 
         n, m = np.random.randint(1, 8, size=(2,))
         A = np.random.randint(-100, 100, size=(n, m,))
