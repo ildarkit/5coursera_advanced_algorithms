@@ -58,9 +58,8 @@ class Simplex:
             # If the basis solution is valid, then any such column (except for the free numbers column)
             # is taken as pivot column, in the row of the objective function of which
             # there is an element that does not correspond to the sign of the optimality sign.
-            pivot_col = self.forced_pivot_col
             min_negative = INF
-            for j in range(self.forced_pivot_col, len(self.simplex_table[-1])):
+            for j in range(1, len(self.simplex_table[-1])):
                 if self.simplex_table[-1][j] + EPS < EPS and self.simplex_table[-1][j] + EPS < min_negative:
                     min_negative = self.simplex_table[-1][j]
                     pivot_col = j
