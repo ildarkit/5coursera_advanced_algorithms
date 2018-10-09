@@ -16,7 +16,10 @@ if __name__ == '__main__':
         # Specific example that you want to test
         # n = 4
         # m = 6
-        # A = np.array([[21, -67, 85, 82, 35, 20], [18, -66, -53, -37, 43, -37], [10, 76, -75, -88, -3, -53], [81, 36, 42, -33, -4, 86]])
+        # A = np.array([[21, -67, 85, 82, 35, 20],
+        #               [18, -66, -53, -37, 43, -37],
+        #               [10, 76, -75, -88, -3, -53],
+        #               [81, 36, 42, -33, -4, 86]])
         # b = np.array([337381, -810669, 901701, 971043])
         # c = np.array([-77, 13, -84, 58, 79, 72])
 
@@ -29,7 +32,8 @@ if __name__ == '__main__':
         print(*c)
         print()
 
-        proc = subprocess.Popen([sys.executable, 'diet.py'], stdin=subprocess.PIPE, stdout=subprocess.PIPE, universal_newlines=True)
+        proc = subprocess.Popen([sys.executable, 'diet.py'], stdin=subprocess.PIPE,
+                                stdout=subprocess.PIPE, universal_newlines=True)
         print(n, m, file=proc.stdin)
         for i in range(n):
             print(*(A[i][j] for j in range(m)), file=proc.stdin)
