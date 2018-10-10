@@ -6,6 +6,7 @@ INF = float('INF')
 INF_CONSTRAINT = 10**9
 EPS = 1e-15  # floating-point error
 ZERO = -1e-6
+PRECISION = 11
 NO_SOLUTION = 1
 BOUNDED_SOLUTION = 2
 INF_SOLUTION = -1
@@ -138,6 +139,7 @@ class Simplex:
                     # simplex table are divided into the pivot element,
                     # the result is taken with the opposite sign
                     new_element = - self.simplex_table[i][j] / pivot
+                new_element = round(new_element, PRECISION)
                 new_simplex_table[-1].append(new_element)
                 if j == 0 and i < len(self.simplex_table) - 1:
                     # Write the new value of the basis variable.
