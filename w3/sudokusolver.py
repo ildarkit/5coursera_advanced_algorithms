@@ -1,7 +1,8 @@
 import os
 import itertools
 
-PUZZLE=[
+
+PUZZLE = [
     "5***1***4",
     "***2*6***",
     "**8*9*6**",
@@ -27,7 +28,7 @@ def exactly_one_of(clauses, literals):
         clauses.append([-l for l in pair])
 
 
-def solve(clauses):
+def sudoku_clauses(clauses):
     # cell [i,j] contains exactly one digit
     for (i, j) in itertools.product(DIGITS, repeat=2):
         exactly_one_of(clauses, [varnum(i, j, k) for k in DIGITS])
@@ -56,7 +57,7 @@ def solve(clauses):
 
 if __name__ == '__main__':
     clauses = []
-    solve(clauses)
+    sudoku_clauses(clauses)
     with open('tmp.cnf', 'w') as f:
         f.write("p cnf {} {}\n".format(999, len(clauses)))
         for c in clauses:
