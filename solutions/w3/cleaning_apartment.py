@@ -9,7 +9,7 @@ def varnum(i, j, lenght):
     :param j: vertex
     :return: boolean variable corresponding to the vertex j.
     """
-    return (i - 1)*lenght + j
+    return (j - 1)*lenght + i
 
 
 def print_equisatisfiable_sat_formula(vertices, clauses):
@@ -29,10 +29,10 @@ def hamiltonian_path_to_sat(vertices, edges):
         [varnum(i, j, vertices) for i in vertices_range] for j in vertices_range
     ]
 
-    # №2. No vertex appears twice in the path
-    for j, k in itertools.combinations(vertices_range, 2):
-        for i in vertices_range:
-            clauses.append([-varnum(i, j, vertices), -varnum(i, k, vertices)])
+    # №2. No vertex "j" appears twice in the path on positions "i" and "k"
+    for j in vertices_range:
+        for i, k in itertools.combinations(vertices_range, 2):
+            clauses.append([-varnum(i, j, vertices), -varnum(k, j, vertices)])
 
     # №3. Each position "i" in a path is occupied by some vertex "j".
     for i in vertices_range:
@@ -43,11 +43,12 @@ def hamiltonian_path_to_sat(vertices, edges):
         for i in vertices_range:
             clauses.append([-varnum(i, j, vertices), -varnum(i, k, vertices)])
 
-    # №5. Non-adjacent nodes "j" and "k" cannot be adjacent in the path.
-    for j, k in itertools.product(vertices_range, repeat=2):
-        if j != k and (j, k) not in edges:
+    # №5. Non-adjacent vertices "j" and "k" cannot be adjacent in the path.
+    for j, k in itertools.combinations(vertices_range, 2):
+        if (j, k) not in edges and (k, j) not in edges:
             for i in range(1, vertices):
                 clauses.append([-varnum(i, j, vertices), -varnum(i + 1, k, vertices)])
+                clauses.append([-varnum(i, k, vertices), -varnum(i + 1, j, vertices)])
 
     return clauses
 
