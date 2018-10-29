@@ -4,19 +4,18 @@ import itertools
 
 def varnum(i, j, lenght):
     """
-    Calculating the variable x_ij for the vertex i of the color j.
-    :param i: number of vertex
-    :param j: color of vertex
-    :return: variable corresponding to the vertex i of the possible color j.
+    Calculating the variable x_ij for the vertex j on position i.
+    :param i: index in Hamiltonian graph
+    :param j: vertex
+    :return: boolean variable corresponding to the vertex j.
     """
     return (i - 1)*lenght + j
 
 
-def print_equisatisfiable_sat_formula(vertices, edges):
+def print_equisatisfiable_sat_formula(vertices, clauses):
     """
     This solution prints a satisfiable formula.
     """
-    clauses = hamiltonian_path_to_sat(vertices, edges)
     variables = vertices * vertices
     print(len(clauses), variables, sep=' ')
     for clause in clauses:
@@ -24,28 +23,31 @@ def print_equisatisfiable_sat_formula(vertices, edges):
 
 
 def hamiltonian_path_to_sat(vertices, edges):
-    # Each vertex belongs to a path.
-    clauses = [[varnum(i, j, vertices) for j in range(1, vertices + 1)] for i in range(1, vertices + 1)]
+    vertices_range = range(1, vertices + 1)
+    # №1. Each vertex "j" belongs to a path.
+    clauses = [
+        [varnum(i, j, vertices) for i in vertices_range] for j in vertices_range
+    ]
 
-    # No vertex appears twice in the path
-    for i in range(1, vertices + 1):
-        for j, k in itertools.combinations(range(1, vertices + 1), 2):
+    # №2. No vertex appears twice in the path
+    for j, k in itertools.combinations(vertices_range, 2):
+        for i in vertices_range:
             clauses.append([-varnum(i, j, vertices), -varnum(i, k, vertices)])
 
-    # Each position in a path is occupied by some vertex.
-    for i in range(1, vertices + 1):
-        clauses.append([varnum(i, i, vertices) for _ in range(1, vertices + 1)])
+    # №3. Each position "i" in a path is occupied by some vertex "j".
+    for i in vertices_range:
+        clauses.append([varnum(i, j, vertices) for j in vertices_range])
 
-    # No two vertices j and k occupy the same position in the path.
-    for i in range(1, vertices + 1):
-        for j, k in itertools.combinations(range(1, vertices + 1), 2):
-            clauses.append([-varnum(j, i, vertices), -varnum(k, i, vertices)])
+    # №4. No two vertices "j" and "k" occupy the same position "i" in the path.
+    for j, k in itertools.combinations(vertices_range, 2):
+        for i in vertices_range:
+            clauses.append([-varnum(i, j, vertices), -varnum(i, k, vertices)])
 
-    # Nonadjacent nodes j and k cannot be adjacent in the path.
-    for i in range(1, vertices):
-        for j, k in itertools.product(range(1, vertices + 1), repeat=2):
-            if j != k and (j, k) not in edges:
-                clauses.append([-varnum(j, i, vertices), -varnum(k, i + 1, vertices)])
+    # №5. Non-adjacent nodes "j" and "k" cannot be adjacent in the path.
+    for j, k in itertools.product(vertices_range, repeat=2):
+        if j != k and (j, k) not in edges:
+            for i in range(1, vertices):
+                clauses.append([-varnum(i, j, vertices), -varnum(i + 1, k, vertices)])
 
     return clauses
 
@@ -53,4 +55,5 @@ def hamiltonian_path_to_sat(vertices, edges):
 if __name__ == '__main__':
     n, m = map(int, input().split())
     edges = [tuple(map(int, input().split())) for _ in range(m)]
-    print_equisatisfiable_sat_formula(n, set(edges))
+    clauses = hamiltonian_path_to_sat(n, set(edges))
+    print_equisatisfiable_sat_formula(n, clauses)
