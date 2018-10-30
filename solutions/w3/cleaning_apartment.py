@@ -23,6 +23,12 @@ def print_equisatisfiable_sat_formula(vertices, clauses):
 
 
 def hamiltonian_path_to_sat(vertices, edges):
+    """
+    Reduction of Hamiltonian path search in the graph problem to sat problem.
+    :param vertices:
+    :param edges:
+    :return: sat clauses
+    """
     vertices_range = range(1, vertices + 1)
     # №1. Each vertex "j" belongs to a path.
     clauses = [
@@ -45,7 +51,7 @@ def hamiltonian_path_to_sat(vertices, edges):
 
     # №5. Non-adjacent vertices "j" and "k" cannot be adjacent in the path.
     for j, k in itertools.combinations(vertices_range, 2):
-        if (j, k) not in edges and (k, j) not in edges:
+        if not edges[j - 1][k - 1]:
             for i in range(1, vertices):
                 clauses.append([-varnum(i, j, vertices), -varnum(i + 1, k, vertices)])
                 clauses.append([-varnum(i, k, vertices), -varnum(i + 1, j, vertices)])
@@ -55,6 +61,12 @@ def hamiltonian_path_to_sat(vertices, edges):
 
 if __name__ == '__main__':
     n, m = map(int, input().split())
-    edges = [tuple(map(int, input().split())) for _ in range(m)]
-    clauses = hamiltonian_path_to_sat(n, set(edges))
+    edges = [[0]*n for _ in range(n)]
+    for _ in range(m):
+        u, v = tuple(map(int, input().split()))
+        u -= 1
+        v -= 1
+        edges[u][v] = 1
+        edges[v][u] = 1
+    clauses = hamiltonian_path_to_sat(n, edges)
     print_equisatisfiable_sat_formula(n, clauses)
