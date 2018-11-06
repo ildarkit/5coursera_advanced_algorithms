@@ -8,7 +8,7 @@ def is_satisfiable():
     Implement a more efficient algorithm here.
     :return:
     """
-    for mask in range(1<<n):
+    for mask in range(1 << n):
         result = [(mask >> i) & 1 for i in range(n)]
         formula_is_satisfied = True
         for clause in clauses:
@@ -27,7 +27,7 @@ def is_satisfiable():
 
 if __name__ == '__main__':
     n, m = map(int, input().split())
-    clauses = [list(map(int, input().split())) for i in range(m)]
+    clauses = [list(map(int, input().split())) for _ in range(m)]
     result = is_satisfiable()
     if result is None:
         print("UNSATISFIABLE")
