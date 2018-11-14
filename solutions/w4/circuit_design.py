@@ -1,34 +1,42 @@
 # python3
 
 
-def is_satisfiable():
-    """
-    This solution tries all possible 2^n variable assignments.
-    It is too slow to pass the problem.
-    Implement a more efficient algorithm here.
-    :return:
-    """
-    for mask in range(1 << n):
-        result = [(mask >> i) & 1 for i in range(n)]
-        formula_is_satisfied = True
-        for clause in clauses:
-            clause_is_satisfied = False
-            if result[abs(clause[0]) - 1] == (clause[0] < 0):
-                clause_is_satisfied = True
-            if result[abs(clause[1]) - 1] == (clause[1] < 0):
-                clause_is_satisfied = True
-            if not clause_is_satisfied:
-                formula_is_satisfied = False
-                break
-        if formula_is_satisfied:
-            return result
-    return None
+class ImplicationGraph:
+    def __init__(self, _2sat):
+        self._2sat = _2sat
+        self.adjacency = dict()
+        self.reversed_adjacency = dict()
+
+    def build(self):
+        for i, j in self._2sat:
+            self.add_2edges([(-i, j), (-j, i)], self.adjacency)
+            self.add_2edges([(i, -j), (j, -i)], self.reversed_adjacency)
+
+    @staticmethod
+    def add_2edges(edges, adj):
+        for i, j in edges:
+            if i in adj:
+                adj[i].append(j)
+            else:
+                adj[i] = [j]
+            if j in adj:
+                adj[j].append(i)
+            else:
+                adj[j] = [i]
+
+    @property
+    def adjacency_graph(self):
+        return self.adjacency
+
+    @property
+    def reversed_adjacency_graph(self):
+        return self.reversed_adjacency
 
 
 if __name__ == '__main__':
     n, m = map(int, input().split())
     clauses = [list(map(int, input().split())) for _ in range(m)]
-    result = is_satisfiable()
+    result = is_satisfiable(clauses)
     if result is None:
         print("UNSATISFIABLE")
     else:
