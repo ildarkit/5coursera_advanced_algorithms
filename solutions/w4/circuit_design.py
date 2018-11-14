@@ -34,28 +34,47 @@ class ImplicationGraph:
 
 
 def is_satisfiable(clauses):
+    sat_assingment = None
     implication_graph = ImplicationGraph(clauses)
     implication_graph.build()
-    find_scc(implication_graph.adjacency_graph, implication_graph.reversed_adjacency_graph)
-    return None
+    scc = find_scc(implication_graph.adjacency_graph,
+                   implication_graph.reversed_adjacency_graph)
+    if scc:
+        for c in reversed(scc):
+            pass
+    return sat_assingment
 
 
 def find_scc(graph, reversed_graph):
+    scc = []
     visited = dict()
     reversed_visited = dict()
-    post_visited = []
-    dfs(reversed_graph, reversed_visited, post_visited)
-    for v in reversed(post_visited):
+    post_order = []
+    dfs(reversed_graph, reversed_visited, post_order)
+    for v in reversed(post_order):
+        scc.append(dict())
         if v not in visited:
-            explore(graph, visited)
+            sat = explore(graph, visited, v, scc)
+            if not sat:
+                return None
+    return scc
 
 
-def dfs(graph, visited, post_visited):
+def dfs(graph, visited, post_order):
     pass
 
 
-def explore(graph, visited):
-    pass
+def explore(graph, visited, v, scc, sat=True):
+    visited[v] = 1
+    scc[-1][v] = v
+    if not sat or -v in scc[-1]:
+        return False
+    for w in graph[v]:
+        if w not in visited:
+            sat = explore(graph, visited, w, scc, sat)
+            if not sat:
+                return sat
+    return sat
 
 
 if __name__ == '__main__':
