@@ -33,6 +33,31 @@ class ImplicationGraph:
         return self.reversed_adjacency
 
 
+def is_satisfiable(clauses):
+    implication_graph = ImplicationGraph(clauses)
+    implication_graph.build()
+    find_scc(implication_graph.adjacency_graph, implication_graph.reversed_adjacency_graph)
+    return None
+
+
+def find_scc(graph, reversed_graph):
+    visited = dict()
+    reversed_visited = dict()
+    post_visited = []
+    dfs(reversed_graph, reversed_visited, post_visited)
+    for v in reversed(post_visited):
+        if v not in visited:
+            explore(graph, visited)
+
+
+def dfs(graph, visited, post_visited):
+    pass
+
+
+def explore(graph, visited):
+    pass
+
+
 if __name__ == '__main__':
     n, m = map(int, input().split())
     clauses = [list(map(int, input().split())) for _ in range(m)]
