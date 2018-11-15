@@ -9,20 +9,16 @@ class ImplicationGraph:
 
     def build(self):
         for i, j in self._2sat:
-            self.add_2edges([(-i, j), (-j, i)], self.adjacency)
-            self.add_2edges([(i, -j), (j, -i)], self.reversed_adjacency)
+            self.add_edges([(-i, j), (-j, i)], self.adjacency)
+            self.add_edges([(j, -i), (i, -j)], self.reversed_adjacency)
 
     @staticmethod
-    def add_2edges(edges, adj):
+    def add_edges(edges, adj):
         for i, j in edges:
             if i in adj:
                 adj[i].append(j)
             else:
                 adj[i] = [j]
-            if j in adj:
-                adj[j].append(i)
-            else:
-                adj[j] = [i]
 
     @property
     def adjacency_graph(self):
@@ -33,16 +29,22 @@ class ImplicationGraph:
         return self.reversed_adjacency
 
 
-def is_satisfiable(clauses):
-    sat_assingment = None
+def is_satisfiable(number_variables, clauses):
+    sat_assignment = None
     implication_graph = ImplicationGraph(clauses)
     implication_graph.build()
     scc = find_scc(implication_graph.adjacency_graph,
                    implication_graph.reversed_adjacency_graph)
     if scc:
-        for c in reversed(scc):
-            pass
-    return sat_assingment
+        sat_assignment = [None]*number_variables
+        i = 0
+        for s in reversed(scc):
+            if i == number_variables:
+                break
+            i += 1
+            for v in s:
+                sat_assignment[abs(v) - 1] = 1 if v > 0 else 0
+    return sat_assignment
 
 
 def find_scc(graph, reversed_graph):
@@ -61,26 +63,32 @@ def find_scc(graph, reversed_graph):
 
 
 def dfs(graph, visited, post_order):
-    pass
+    for v in graph:
+        explore(graph, visited, v, post_order=post_order)
 
 
-def explore(graph, visited, v, scc, sat=True):
+def explore(graph, visited, v, scc=None, sat=True, post_order=None):
+    if v in visited:
+        return
     visited[v] = 1
-    scc[-1][v] = v
-    if not sat or -v in scc[-1]:
-        return False
-    for w in graph[v]:
+    for w in graph.get(v, ()):
         if w not in visited:
-            sat = explore(graph, visited, w, scc, sat)
+            sat = explore(graph, visited, w, scc, sat, post_order)
             if not sat:
                 return sat
+    if scc:
+        scc[-1][v] = v
+    if not sat or (scc and -v in scc[-1]):
+        return False
+    if post_order is not None:
+        post_order.append(v)
     return sat
 
 
 if __name__ == '__main__':
     n, m = map(int, input().split())
     clauses = [list(map(int, input().split())) for _ in range(m)]
-    result = is_satisfiable(clauses)
+    result = is_satisfiable(n, clauses)
     if result is None:
         print("UNSATISFIABLE")
     else:
