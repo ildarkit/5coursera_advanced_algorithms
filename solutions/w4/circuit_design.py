@@ -1,6 +1,9 @@
 # python3
 
 
+DEBUG = False
+
+
 class ImplicationGraph:
     def __init__(self, _2sat):
         self._2sat = _2sat
@@ -79,6 +82,8 @@ def explore(graph, visited, v, scc=None, sat=True, post_order=None):
     if scc:
         scc[-1][v] = v
     if not sat or (scc and -v in scc[-1]):
+        if DEBUG:
+            print('(DEBUG) v and -v in same scc: v = {}'.format(v))
         return False
     if post_order is not None:
         post_order.append(v)
