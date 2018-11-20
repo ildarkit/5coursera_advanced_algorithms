@@ -43,8 +43,8 @@ def two_cnf_generator():
         low = round(len_variables / 2) + 1
     else:
         low = len_variables // 2
-    if len_variables // 2 > 3:
-        nclauses = randrange(low, (len_variables // 2)*(len_variables // 2 - 1))
+    if low > 1:
+        nclauses = randrange(low, low*(low - 1) + 1)
     else:
         nclauses = low
     clauses = [[len(variables) // 2, nclauses]]
