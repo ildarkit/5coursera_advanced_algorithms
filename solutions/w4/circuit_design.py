@@ -40,11 +40,7 @@ def is_satisfiable(number_variables, clauses):
                    implication_graph.reversed_adjacency_graph)
     if scc:
         sat_assignment = [None]*number_variables
-        i = 0
         for s in reversed(scc):
-            if i == number_variables:
-                break
-            i += 1
             for v in s:
                 sat_assignment[abs(v) - 1] = 1 if v > 0 else 0
     return sat_assignment
@@ -57,8 +53,8 @@ def find_scc(graph, reversed_graph):
     post_order = []
     dfs(reversed_graph, reversed_visited, post_order)
     for v in reversed(post_order):
-        scc.append(dict())
         if v not in visited:
+            scc.append(dict())
             sat = explore(graph, visited, v, scc)
             if not sat:
                 return None
@@ -99,4 +95,4 @@ if __name__ == '__main__':
         print("UNSATISFIABLE")
     else:
         print("SATISFIABLE")
-        print(" ".join(str(-i-1 if result[i] else i+1) for i in range(n)))
+        print(" ".join(str(i if result[i - 1] else -i) for i in range(1, n + 1)))

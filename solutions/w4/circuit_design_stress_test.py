@@ -29,7 +29,7 @@ if __name__ == '__main__':
         result = circuit_design.is_satisfiable(clauses[0][0], clauses[1:])
 
         if result:
-            vars_map = {i+1: not result[i] for i in range(clauses[0][0])}
+            vars_map = {i + 1: result[i] for i in range(clauses[0][0])}
             is_correct = True
             for var1, var2 in clauses[1:]:
                 if not is_satisfy(var1, var2, vars_map):
@@ -37,7 +37,7 @@ if __name__ == '__main__':
                     break
             if not is_correct:
                 err += 1
-                bool_assignment = " ".join(str(-i - 1 if result[i] else i + 1) for i in range(clauses[0][0]))
+                bool_assignment = " ".join(str(i if result[i - 1] else -i) for i in range(1, clauses[0][0] + 1))
                 print('(ERROR) INCORRECT ANSWER FOR:')
                 print('clauses = {}'.format(clauses))
                 print('boolean assignment is falsified = {}'.format(bool_assignment))
