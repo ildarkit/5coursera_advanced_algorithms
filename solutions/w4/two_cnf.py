@@ -1,7 +1,7 @@
 from itertools import chain
 from random import randint, randrange, choice
 
-VARS = 3  # max number of variables
+VARS = 100  # max number of variables
 
 
 def append_var(clauses, v):

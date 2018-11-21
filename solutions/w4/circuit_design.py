@@ -84,6 +84,7 @@ def explore(graph, visited, v, scc=None, sat=True, post_order=None):
     if not sat or (scc and -v in scc[-1]):
         if DEBUG:
             print('(DEBUG) v and -v in same scc: v = {}'.format(v))
+            print('(DEBUG) SCCs = {}'.format(scc))
         return False
     if post_order is not None:
         post_order.append(v)
