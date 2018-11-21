@@ -1,4 +1,6 @@
 # python3
+import sys
+import threading
 
 
 DEBUG = False
@@ -87,7 +89,7 @@ def explore(graph, visited, v, scc=None, sat=True, post_order=None):
     return sat
 
 
-if __name__ == '__main__':
+def main():
     n, m = map(int, input().split())
     clauses = [list(map(int, input().split())) for _ in range(m)]
     result = is_satisfiable(n, clauses)
@@ -96,3 +98,13 @@ if __name__ == '__main__':
     else:
         print("SATISFIABLE")
         print(" ".join(str(i if result[i - 1] else -i) for i in range(1, n + 1)))
+
+
+if __name__ == '__main__':
+    # This code is used to avoid stack overflow issues
+    sys.setrecursionlimit(10 ** 6)  # max depth of recursion
+    threading.stack_size(2 ** 26)  # new thread will get stack of such size
+    t = threading.Thread(target=main)
+    t.start()
+    t.join()
+
