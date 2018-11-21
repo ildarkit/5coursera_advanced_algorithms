@@ -10,10 +10,10 @@ def is_satisfy(var1, var2, var_map):
 
 
 def is_true(var, var_map):
-    v = var_map.get(var, vars_map[-var])
+    bool_value = var_map[abs(var)]
     if var < 0:
-        v = not v
-    return v
+        bool_value = not bool_value
+    return bool_value
 
 
 if __name__ == '__main__':
@@ -27,22 +27,24 @@ if __name__ == '__main__':
         try:
             result = is_satisfiable(clauses[0][0], clauses)
         except (TypeError, IndexError) as e:
-            print('(ERROR):', e)
+            print('(EXCEPT):', e)
             print('clauses={}'.format(clauses))
             continue
         if result:
-            vars_map = {-i-1 if result[i] else i+1: result[i] for i in range(clauses[0][0])}
+            vars_map = {i+1: not result[i] for i in range(clauses[0][0])}
             is_correct = True
-            for var1, var2 in result[1:]:
+            for var1, var2 in clauses[1:]:
                 if not is_satisfy(var1, var2, vars_map):
                     is_correct = False
                     break
             if not is_correct:
                 err += 1
-                print('INCORRECT ANSWER FOR:')
-                print(clauses)
-        else:
-            print('(DEBUG) Need check for clauses:')
+                bool_assignment = " ".join(str(-i - 1 if result[i] else i + 1) for i in range(clauses[0][0]))
+                print('(ERROR) INCORRECT ANSWER FOR:')
+                print('clauses = {}'.format(clauses))
+                print('boolean assignment is falsified = {}'.format(bool_assignment))
+        elif DEBUG:
+            print('(DEBUG) UNSATISFIABLE answer for clauses:')
             print(clauses)
         if total * ERROR_THRESHOLD <= err and err > 0 or total >= stop:
             break
