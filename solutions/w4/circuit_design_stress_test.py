@@ -1,3 +1,6 @@
+import sys
+import threading
+
 import circuit_design
 from two_cnf import two_cnf_generator
 
@@ -16,12 +19,11 @@ def is_true(var, var_map):
     return bool_value
 
 
-if __name__ == '__main__':
+def run_tests():
     stop = 1000
     total = 0
     err = 0
     circuit_design.DEBUG = True
-
     while True:
         total += 1
         clauses = two_cnf_generator()
@@ -35,12 +37,16 @@ if __name__ == '__main__':
                 if not is_satisfy(var1, var2, vars_map):
                     is_correct = False
                     break
+            bool_assignment = " ".join(str(i if result[i - 1] else -i) for i in range(1, clauses[0][0] + 1))
             if not is_correct:
                 err += 1
-                bool_assignment = " ".join(str(i if result[i - 1] else -i) for i in range(1, clauses[0][0] + 1))
                 print('(ERROR) INCORRECT ANSWER FOR:')
                 print('clauses = {}'.format(clauses))
                 print('boolean assignment is falsified = {}'.format(bool_assignment))
+            else:
+                print('(INFO) SATISFIABLE answer for clauses:')
+                print(clauses)
+                print('boolean assignment is satisfied = {}'.format(bool_assignment))
         elif circuit_design.DEBUG:
             print('(DEBUG) UNSATISFIABLE answer for clauses:')
             print(clauses)
@@ -48,3 +54,11 @@ if __name__ == '__main__':
             break
         if total % 100 == 0:
             print('(INFO) total = {}, err = {}'.format(total, err))
+
+
+if __name__ == '__main__':
+    sys.setrecursionlimit(10 ** 6)  # max depth of recursion
+    threading.stack_size(2 ** 26)  # new thread will get stack of such size
+    t = threading.Thread(target=run_tests)
+    t.start()
+    t.join()
