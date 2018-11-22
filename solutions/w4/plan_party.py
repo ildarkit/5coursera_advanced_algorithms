@@ -28,15 +28,13 @@ def dfs(tree, vertex, parent):
     if tree[vertex].d == INF:
 
         m1 = tree[vertex].weight
+        m0 = 0
         for child in tree[vertex].children:
             if child != parent:
                 for grandchild in tree[child].children:
                     if grandchild != vertex:
                         m1 += dfs(tree, grandchild, child)
 
-        m0 = 0
-        for child in tree[vertex].children:
-            if child != parent:
                 m0 += dfs(tree, child, vertex)
 
         tree[vertex].d = max(m1, m0)
