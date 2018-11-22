@@ -4,9 +4,13 @@ import sys
 import threading
 
 
+INF = 10000
+
+
 class Vertex:
     def __init__(self, weight):
         self.weight = weight
+        self.d = INF
         self.children = []
 
 
@@ -21,21 +25,30 @@ def read_tree():
 
 
 def dfs(tree, vertex, parent):
-    for child in tree[vertex].children:
-        if child != parent:
-            dfs(tree, child, vertex)
-    # This is a template function for processing a tree using depth-first search.
-    # Write your code here.
-    # You may need to add more parameters to this function for child processing.
+    if tree[vertex].d == INF:
+
+        m1 = tree[vertex].weight
+        for child in tree[vertex].children:
+            if child != parent:
+                for grandchild in tree[child].children:
+                    if grandchild != vertex:
+                        m1 += dfs(tree, grandchild, child)
+
+        m0 = 0
+        for child in tree[vertex].children:
+            if child != parent:
+                m0 += dfs(tree, child, vertex)
+
+        tree[vertex].d = max(m1, m0)
+
+    return tree[vertex].d
 
 
 def max_weight_independent_tree_subset(tree):
     size = len(tree)
-    if size == 0:
-        return 0
-    dfs(tree, 0, -1)
-    # You must decide what to return.
-    return 0
+    if not size:
+        return size
+    return dfs(tree, 0, -1)
 
 
 def main():
