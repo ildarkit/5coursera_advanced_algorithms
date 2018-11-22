@@ -9,6 +9,13 @@ ERROR_THRESHOLD = 0.1
 
 
 def is_satisfy(var1, var2, var_map):
+    """
+    Checking the clause in 2-cnf form for a given boolean variables.
+    :param var1: first variable
+    :param var2: second variable
+    :param var_map: the values of these variables
+    :return: True if clause is satisfy, else False
+    """
     return is_true(var1, var_map) or is_true(var2, var_map)
 
 

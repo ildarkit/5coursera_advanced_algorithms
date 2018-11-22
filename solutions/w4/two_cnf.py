@@ -45,15 +45,19 @@ def two_cnf_generator():
     # list of variables
     variables = [i for i in chain(range(min_variables, 0), range(1, max_variables)) if i]
     shake(variables)
+
     len_variables = len(variables)
     if len_variables / 2 % 1 > 0.0:
-        low = round(len_variables / 2) + 1
+        min_nclauses = round(len_variables / 2) + 1
     else:
-        low = len_variables // 2
-    nclauses = randrange(low, number_pair_combinations(len_variables) + 1)
+        min_nclauses = len_variables // 2
+
+    # random number of clauses
+    nclauses = randrange(min_nclauses, number_pair_combinations(len_variables) + 1)
     clauses = [[len(variables) // 2, nclauses]]
     unique_clauses = dict()
     i = 0
+
     while i < nclauses*2:
         if variables:
             v = variables.pop()
