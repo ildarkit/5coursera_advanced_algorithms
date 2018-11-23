@@ -4,17 +4,24 @@ import sys
 import threading
 
 
-INF = 10000
+INF = 100000000
 
 
 class Vertex:
+    """
+    Vertex with its weight, independent subset weight and list of children.
+    """
     def __init__(self, weight):
         self.weight = weight
-        self.d = INF
+        self.independent_weight = INF
         self.children = []
 
 
 def read_tree():
+    """
+    Input the tree.
+    :return: tree
+    """
     size = int(input())
     tree = [Vertex(w) for w in map(int, input().split())]
     for i in range(1, size):
@@ -25,21 +32,29 @@ def read_tree():
 
 
 def dfs(tree, vertex, parent):
-    if tree[vertex].d == INF:
+    """
+    Traversing the tree in depth.
+    :param tree: tree
+    :param vertex: current vertex
+    :param parent: parent of the current vertex
+    :return: maximum possible weight of independent subsets
+    """
+    if tree[vertex].independent_weight == INF:
 
-        m1 = tree[vertex].weight
-        m0 = 0
+        independent_children_weight = 0
+        independent_self_grandchildren_weight = tree[vertex].weight
         for child in tree[vertex].children:
             if child != parent:
                 for grandchild in tree[child].children:
                     if grandchild != vertex:
-                        m1 += dfs(tree, grandchild, child)
+                        independent_self_grandchildren_weight += dfs(tree, grandchild, child)
 
-                m0 += dfs(tree, child, vertex)
+                independent_children_weight += dfs(tree, child, vertex)
 
-        tree[vertex].d = max(m1, m0)
+        tree[vertex].independent_weight = max(independent_self_grandchildren_weight,
+                                              independent_children_weight)
 
-    return tree[vertex].d
+    return tree[vertex].independent_weight
 
 
 def max_weight_independent_tree_subset(tree):
@@ -50,6 +65,7 @@ def max_weight_independent_tree_subset(tree):
 
 
 def main():
+    # function is executed in thread
     tree = read_tree()
     weight = max_weight_independent_tree_subset(tree)
     print(weight)
